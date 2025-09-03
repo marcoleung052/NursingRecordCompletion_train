@@ -45,4 +45,4 @@ while True:
             prompt = candidates[ord(choice) - 97]
             print(f"\n目前句子：{prompt}")
         else:
-            print("⚠️ 無效選項或指令，請重新輸入。")
+            print("無效選項或指令，請重新輸入。")
