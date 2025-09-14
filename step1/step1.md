@@ -39,5 +39,5 @@
 | [gpt2_all.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/bdd58bcc5b37a6d8cee679fca3fa03ec33e8b781/step1/gpt2_all.py "游標顯示")      | 全部資料   | pipeline 自動 | 無         | 標準訓練           | - | 
 | [gpt2_5000.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/bdd58bcc5b37a6d8cee679fca3fa03ec33e8b781/step1/gpt2_5000.py "游標顯示")    | 前 5000 筆 | 逐詞補全     | 高度互動   | LSTM 預訓練 + GPT2 | 在專有名詞斷句預測範圍較多 |  
 | [gpt2_5%.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/bdd58bcc5b37a6d8cee679fca3fa03ec33e8b781/step1/gpt2_5%25.py "游標顯示")      | 5% 抽樣    | 逐詞補全     | 高度互動   | 防過擬合訓練       | 只要不是連接詞等等能預測幾個字與樣本一樣 | 
-| [gpt2_ok.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/bdd58bcc5b37a6d8cee679fca3fa03ec33e8b781/step1/gpt2_ok.py "游標顯示")      | 全部資料   | 逐詞補全     | 高度互動   | 標準訓練           | 只要不是連接詞等等能預測幾個字與樣本一樣 |
+| [gpt2_ok.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/7aa012855cdff76302c3ea8a8313a7385919003a/step1/gpt2_ok.py "游標顯示")      | 全部資料   | 逐詞補全     | 高度互動   | 標準訓練           | 只要不是連接詞等等能預測幾個字與樣本一樣 |
 | [gpt2_ok_all.py](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/bdd58bcc5b37a6d8cee679fca3fa03ec33e8b781/step1/gpt2_ok_all.py "游標顯示")  | 全部資料   | 句子補全     | 中度互動   | 標準訓練           | 第一個字跟樣本一樣其他不同 |
