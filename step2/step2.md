@@ -13,10 +13,10 @@
 - bitnet-b1.58-2B-4T(microsoft) (GPU記憶體不足)
 
 ### 可運行：
-- GPT2
-- TinyLlama-1.1B
-- Qwen3-0.6B
-- Opt-350m(facebook)
+- [GPT2](-)
+- [TinyLlama-1.1B](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/0a83c97a7ad4afd9d8b347bfbc98fcb5fcea7aae/step2/TinyLlama-1.1B.py)
+- [Qwen3-0.6B](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/0a83c97a7ad4afd9d8b347bfbc98fcb5fcea7aae/step2/Qwen3-0.6.py)
+- [Opt-350m(facebook)](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/0a83c97a7ad4afd9d8b347bfbc98fcb5fcea7aae/step2/opt-350M.py)
 
 ## 主要功能對比
 
