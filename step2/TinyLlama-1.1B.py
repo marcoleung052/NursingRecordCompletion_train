@@ -50,10 +50,10 @@ lora_config = LoraConfig(
 model = get_peft_model(model, lora_config)
 model.print_trainable_parameters()
 
-# ✅ 強制關閉 use_cache，避免梯度丟失
-model.enable_input_require_grads()  # ✅ 確保輸入能回傳梯度
-model.gradient_checkpointing_enable()  # ✅ 啟用 checkpointing
-model.config.use_cache = False  # ✅ 避免衝突
+# 強制關閉 use_cache，避免梯度丟失
+model.enable_input_require_grads()  # 確保輸入能回傳梯度
+model.gradient_checkpointing_enable()  # 啟用 checkpointing
+model.config.use_cache = False  # 避免衝突
 
 
 # 建立資料集
@@ -74,7 +74,7 @@ def tokenize_function(examples):
 tokenized_dataset = dataset.map(tokenize_function, batched=True)
 tokenized_dataset = tokenized_dataset.remove_columns(["text"])
 
-# ✅ 手動測試 loss 是否存在
+# 手動測試 loss 是否存在
 sample = tokenized_dataset[0]
 input_ids = torch.tensor([sample["input_ids"]]).to(model.device)
 attention_mask = torch.tensor([sample["attention_mask"]]).to(model.device)
@@ -87,7 +87,7 @@ outputs = model(
     labels=labels
 )
 
-print("✅ 測試 loss:", outputs.loss)
+print("測試 loss:", outputs.loss)
 assert outputs.loss is not None, "❌ 模型未回傳 loss，請檢查 labels 是否正確"
 
 # 設定 Trainer 微調
@@ -110,7 +110,7 @@ training_args = TrainingArguments(
 )
 
 
-# ✅ 使用官方推薦的 data_collator
+# 使用官方推薦的 data_collator
 def data_collator(features):
     batch = {
         "input_ids": torch.tensor([f["input_ids"] for f in features], dtype=torch.long),
