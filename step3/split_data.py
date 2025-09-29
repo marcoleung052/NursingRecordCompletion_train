@@ -41,8 +41,8 @@ part_a_texts, part_b_texts = train_test_split(
 part_a_count = len(part_a_texts)
 part_b_count = len(part_b_texts)
 
-print(f"   - Part A (20%): {part_a_count} 筆")
-print(f"   - Part B (80%): {part_b_count} 筆")
+print(f"   - test set (20%): {part_a_count} 筆")
+print(f"   - train set (80%): {part_b_count} 筆")
 print(f"   - 總和檢查: {part_a_count + part_b_count} / {total_records} 筆")
 
 
