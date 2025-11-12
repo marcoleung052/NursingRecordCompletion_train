@@ -3,7 +3,8 @@
  * 呼叫後端代理伺服器，使用 Google Gemini API 進行 Copilot 文本生成。
  */
 
-const BACKEND_API_URL = "http://127.0.0.1:5000/predict";
+/*const BACKEND_API_URL = "http://127.0.0.1:5000/predict";*/
+const BACKEND_API_URL = "https://MarcoLeung052/nursing-copilot-api.hf.space/predict";
 let apiCallTimeout = null;
 let isAPICallInProgress = false;
 
