@@ -14,8 +14,9 @@ app = FastAPI(title="GPT-2 Nursing Completion API")
 # 設置 CORS：允許前端頁面 (localhost 或您的服務器 IP) 訪問
 # ⚠️ 注意：在生產環境中，請將 "http://localhost:5500" 替換為您的前端域名！
 origins = [
-    "http://localhost:5500",  # 假設您使用 VS Code Live Server 或類似工具
-    "http://127.0.0.1:5500",
+    #"http://localhost:5500",  # 假設您使用 VS Code Live Server 或類似工具
+    #"http://127.0.0.1:5500",
+    "https://marcoleung052.github.io/NursingRecordCompletion_train//step7/%E8%AD%B7%E7%90%86%E7%B4%80%E9%8C%84%E7%B3%BB%E7%B5%B1demo.html",
     "*" # 為了測試方便，暫時允許所有來源
 ]
 
