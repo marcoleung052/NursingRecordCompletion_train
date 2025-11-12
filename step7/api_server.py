@@ -16,7 +16,10 @@ app = FastAPI(title="GPT-2 Nursing Completion API")
 origins = [
     #"http://localhost:5500",  # 假設您使用 VS Code Live Server 或類似工具
     #"http://127.0.0.1:5500",
-    "https://marcoleung052.github.io/NursingRecordCompletion_train//step7/%E8%AD%B7%E7%90%86%E7%B4%80%E9%8C%84%E7%B3%BB%E7%B5%B1demo.html",
+    # 這是您的 GitHub Pages 域名（標準格式）
+    "https://marcoleung052.github.io", 
+    # 這是您的 GitHub Pages 子專案路徑 (如果使用子路徑)
+    "https://marcoleung052.github.io/NursingRecordCompletion_train",
     "*" # 為了測試方便，暫時允許所有來源
 ]
 
