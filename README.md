@@ -22,3 +22,4 @@
 > # step 7 (25/11/13)
 >> [護理記錄補全UI(0) link](https://marcoleung052.github.io/NursingRecordCompletion_train/step6/UI.html "游標顯示")<br>
 >> [護理記錄補全UI(1) link](https://marcoleung052.github.io/NursingRecordCompletion_train/step7/%E8%AD%B7%E7%90%86%E7%B4%80%E9%8C%84%E7%B3%BB%E7%B5%B1demo1.html "游標顯示")<br>
+>> [護理記錄補全網站報告](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/ce3e7ab53c574448a901d524462e55b83677e11b/step7/present_5.pdf "游標顯示")
