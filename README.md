@@ -20,5 +20,5 @@
 >> [護理記錄補全UI(0) code](https://github.com/marcoleung052/NursingRecordCompletion_train/blob/6e6030f46acdca87d89752a271d031e28649036f/step6/UI.html "游標顯示") 
 
 > # step 7 (25/11/13)
->> [護理記錄補全UI(1) link]( "游標顯示")
+>> [護理記錄補全UI(1) link]( "游標顯示")<br>
 >> [護理記錄補全UI(1) code]( "游標顯示")
