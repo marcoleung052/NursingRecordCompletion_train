@@ -46,7 +46,7 @@ async function predictText(inputText) {
         }
 
         // 期望後端返回一個包含三個生成文本的數組：["text1", "text2", "text3"]
-        const generatedTexts = await response.json();
+        const generatedTexts = responseJson.completions;
         
         if (Array.isArray(generatedTexts) && generatedTexts.length > 0) {
             // 返回時，將第一個結果作為預設建議
