@@ -1,0 +1,2071 @@
+<html lang="zh-TW"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>護理紀錄系統 - 真實 AI 補全版本</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 導航列 */
+        .navbar {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        /* 標題上的 AI 標籤 */
+        .navbar h1 .ai-tag {
+            font-size: 14px;
+            padding: 4px 8px;
+            background: #FFD700; 
+            color: #333;
+            border-radius: 8px;
+            font-weight: bold;
+            margin-left: 10px;
+            vertical-align: middle;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+
+        .navbar .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: white;
+            border-radius: 10px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .menu-toggle:hover {
+            background: #f3f4f6;
+            transform: scale(1.05);
+        }
+
+        /* 頁面內容 */
+        .page-content {
+            display: none;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        .page-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 表單容器 */
+        .form-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .form-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .form-header h2 {
+            color: #333;
+            font-size: 24px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        /* 雙欄格 */
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .custom-select {
+            position: relative;
+        }
+
+        .custom-select select {
+            appearance: none;
+            background: white url('data:image/svg+xml;utf8,<svg fill="%23666" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>') no-repeat right 10px center;
+            background-size: 20px;
+            cursor: pointer;
+            padding-right: 40px;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+            box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(239, 68, 68, 0.4);
+        }
+
+        /* 紀錄列表 */
+        .record-list {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .record-list-header {
+            padding: 25px 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .record-list-header h2 {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            position: relative;
+            display: flex; 
+        }
+        
+        .search-input-group {
+            flex-grow: 1;
+            display: flex;
+        }
+
+        .search-box input {
+            flex-grow: 1;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e5e7eb;
+            border-right: none;
+            border-radius: 10px 0 0 10px;
+            font-size: 15px;
+        }
+
+        .search-box::before {
+            content: "🔍";
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 18px;
+            pointer-events: none; 
+            z-index: 10;
+        }
+        
+        .search-button {
+            padding: 0 15px;
+            border: 2px solid #e5e7eb;
+            border-left: none;
+            border-radius: 0 10px 10px 0;
+            background: #f3f4f6;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .search-button:hover {
+            background: #e5e7eb;
+        }
+        
+        /* 隱藏原生搜尋圖示 */
+        .search-box input::-webkit-search-decoration,
+        .search-box input::-webkit-search-cancel-button,
+        .search-box input::-webkit-search-results-button,
+        .search-box input::-webkit-search-results-decoration {
+            display: none;
+        }
+
+
+        .filter-btn {
+            padding: 12px 20px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .filter-btn:hover {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        /* 表格 */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f9fafb;
+        }
+
+        thead th {
+            padding: 15px 20px;
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.3s ease;
+        }
+
+        tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        tbody td {
+            padding: 20px;
+            color: #333;
+        }
+
+        .patient-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .patient-avatar {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .patient-details .name {
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 4px;
+        }
+
+        .patient-details .id {
+            font-size: 13px;
+            color: #999;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-completed {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-in-progress {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            font-size: 18px;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .action-btn.view {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .action-btn.edit {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .action-btn.delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .pagination-info {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .pagination-buttons button {
+            padding: 8px 16px;
+            border: 2px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-buttons button:hover:not(.active) {
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .pagination-buttons button.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* 成功提示 */
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px 30px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 1000;
+            transform: translateX(400px);
+        }
+
+        .success-message.show {
+            animation: slideInRight 0.5s ease forwards;
+        }
+
+        .success-message.hide {
+            animation: slideOutRight 0.5s ease forwards;
+        }
+
+        @keyframes slideInRight {
+            to {
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes slideOutRight {
+            to {
+                transform: translateX(400px);
+            }
+        }
+
+        .success-icon {
+            width: 40px;
+            height: 40px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+        }
+
+        /* Loading 動畫 */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .loading.show {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .settings-content {
+            display: none;
+        }
+
+        .settings-content.active {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* 紀錄預覽卡片樣式 */
+        .record-preview-item {
+            background: #f9fafb;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-left: 5px solid #667eea;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            position: relative; /* for action buttons */
+        }
+        .record-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            color: #666;
+            font-size: 14px;
+            flex-wrap: wrap; /* RWD */
+            gap: 10px;
+        }
+        
+        .record-item-header .record-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .record-preview-item p {
+            margin-bottom: 10px;
+            line-height: 1.6;
+            color: #333;
+            /* 讓換行符號生效 */
+            white-space: pre-wrap;
+        }
+        
+        /* 紀錄編輯區域 */
+        .record-edit-area {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px dashed #ddd;
+            display: none;
+        }
+        .record-edit-area.active {
+            display: block;
+        }
+        
+        /* 紀錄編輯按鈕 */
+        .record-edit-buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .record-edit-buttons .btn {
+            padding: 8px 20px;
+            font-size: 14px;
+        }
+        
+        .record-edit-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: inherit;
+            transition: all 0.3s ease;
+        }
+        .record-edit-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        /* --- Copilot 核心 CSS --- */
+        /* 新增：用於包裹所有紀錄輸入區塊的容器 */
+        #recordInputsContainer {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* 每個輸入區塊之間的間距 */
+        }
+
+        /* 新增：動態插入的單個紀錄區塊 */
+        .record-input-block {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            background: #fcfcfc;
+            position: relative;
+        }
+
+        /* 新增：移除按鈕樣式 */
+        .btn-remove-block {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: transparent;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        .btn-remove-block:hover {
+            color: #ef4444;
+        }
+
+        /* 新增：插入新區塊的按鈕容器 */
+        .add-block-container {
+            display: flex;
+            justify-content: center; /* 讓按鈕居中 */
+            margin-top: 15px;
+        }
+
+        .btn-add-block {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+            border-radius: 50%; /* 變成圓形按鈕 */
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            line-height: 1;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+            font-weight: bold;
+        }
+
+        .btn-add-block:hover {
+            transform: scale(1.1);
+            background: #764ba2;
+        }
+
+
+        /* 每個輸入塊的 AI 結構 */
+        .copilot-container {
+            position: relative;
+            /* 繼承 form-group 的樣式 */
+        }
+
+        .record-textarea {
+            width: 100%;
+            background-color: transparent; 
+            color: #333; 
+            z-index: 3; 
+            position: relative;
+            
+            /* 確保與 Overlay 的邊框、內邊距、圓角完全同步 */
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            min-height: 150px; /* 初始高度調低一點 */
+            resize: vertical;
+
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            font-size: 15px;
+            line-height: 1.5; 
+            white-space: pre-wrap; 
+            overflow: auto; 
+        }
+        .record-textarea:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .suggestion-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; 
+            color: #ccc; 
+            
+            /* 必須與 Textarea 相同 */
+            padding: 12px 15px; 
+            border-radius: 10px; 
+            font-family: 'Microsoft JhengHei', 'PingFang TC', sans-serif;
+            font-size: 15px;
+            line-height: 1.5; 
+            white-space: pre-wrap; 
+            pointer-events: none;
+            overflow: auto; 
+            
+            /* 確保 Overlay 邊界在 Textarea 邊界之內 */
+            border: 2px solid transparent; 
+        }
+        /* --- Copilot 核心 CSS 結束 --- */
+
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .form-grid, .form-grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .search-filters {
+                flex-direction: column;
+            }
+
+            .search-box {
+                min-width: 100%;
+            }
+
+            .table-container {
+                overflow-x: scroll;
+            }
+
+            table {
+                min-width: 800px;
+            }
+        }
+
+        /* 登入頁面樣式 */
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .login-container h2 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+        
+        .login-container input[type="text"],
+        .login-container input[type="password"] {
+            width: 100%;
+            margin-bottom: 20px;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+        }
+        
+        .login-container button {
+            width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+            height: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, #764ba2, #667eea);
+        }
+    </style>
+</head>
+<body>
+    <div class="loading" id="loading">
+        <div class="spinner"></div>
+    </div>
+
+    <div id="successMessage" class="success-message">
+        <div class="success-icon">✓</div>
+        <div>
+            <strong>操作成功！</strong>
+            <p style="margin: 5px 0 0; color: #666; font-size: 14px;">護理紀錄已儲存</p>
+        </div>
+    </div>
+    
+    <div id="login" class="page-content active">
+        <div class="login-container">
+            <h2>🏥 系統登入</h2>
+            <form onsubmit="login(event)">
+                <div class="form-group">
+                    <label>員工編號/ID</label>
+                    <input type="text" id="loginId" value="N001" required="" placeholder="請輸入員工編號/ID">
+                </div>
+                <div class="form-group">
+                    <label>密碼</label>
+                    <input type="password" id="loginPassword" value="1234" required="" placeholder="請輸入密碼">
+                </div>
+                <button type="submit" class="btn btn-primary" style="margin-top: 15px;">
+                    登入系統
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 13px; color: #999;">示範帳號：N001 / 1234</p>
+        </div>
+    </div>
+    <div class="container" id="mainApp" style="display: none;">
+        <nav class="navbar">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h1 onclick="switchPage('patients')">🏥 護理紀錄系統 <span class="ai-tag">真實 AI 補全</span></h1>
+            </div>
+            <div class="user-info">
+                <div>
+                    <div style="font-weight: 500; color: #333;" id="navUserName">張護理師</div>
+                    <div style="font-size: 13px; color: #999;" id="navUserDetail">資深護理師 · 內科</div>
+                </div>
+                <div class="user-avatar" id="navUserAvatar" onclick="switchPage('settings')">張</div>
+            </div>
+        </nav>
+
+        
+        <div id="form" class="page-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>新增 <span id="formPatientName" style="color: #667eea;">病患</span> 的護理紀錄</h2>
+                    <button class="btn btn-secondary" onclick="cancelRecordForm()">← 返回列表</button>
+                </div>
+
+                <form id="recordForm" onsubmit="submitForm(event)">
+                    <h3 style="color: #667eea; margin-bottom: 20px; font-size: 18px;">基本資訊</h3>
+                    
+                    <div class="form-group">
+                        <label>紀錄時間 <span class="required">*</span></label>
+                        <input type="datetime-local" id="recordTime" required="">
+                    </div>
+                        
+                    <div class="form-group" style="margin-top: 30px;">
+                        <label>護理紀錄內容 (DART 格式) <span class="required">*</span></label>
+                        <p style="margin-bottom: 15px; font-size: 14px; color: #666;">您可以使用 **F) 呼吸急促** 或 **F) 傷口** 等關鍵字體驗 AI 補全。按 **Tab** 接受，**↑/↓** 切換建議。</p>
+                        
+                        <div id="recordInputsContainer">
+                            </div>
+
+                        <div class="add-block-container">
+                            <button type="button" class="btn-add-block" title="新增一格紀錄區塊" onclick="addRecordInput()">+</button>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="resetForm()">清除所有內容</button>
+                        <button type="submit" class="btn btn-primary">
+                            ✓ 儲存紀錄 (將合併所有區塊內容)
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="patients" class="page-content">
+            <div class="record-list">
+                <div class="record-list-header">
+                    <h2>病患管理</h2>
+                    <div class="search-filters">
+                        <div class="search-box">
+                            <input type="text" id="patientSearchInput" placeholder="搜尋病患姓名或病歷號..." onkeypress="if(event.keyCode==13) searchPatients()">
+                            <button class="search-button" onclick="searchPatients()">🔍</button>
+                        </div>
+                        <select class="filter-btn">
+                            <option value="">所有科別</option>
+                            <option value="internal">內科</option>
+                            <option value="surgery">外科</option>
+                            <option value="orthopedics">骨科</option>
+                            <option value="urology">泌尿科</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="switchPage('addPatientForm')">
+                            ➕ 新增病患
+                        </button>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>病患資訊</th>
+                                <th>病房床號</th>
+                                <th>科別</th>
+                                <th>診斷</th>
+                                <th>風險等級</th>
+                                <th>主治醫師</th>
+                                <th>入院日期</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="patientTableBody">
+                            </tbody>
+                    </table>
+                </div>
+                <div class="pagination">
+                    <div class="pagination-info">目前無病患資料</div>
+                    <div class="pagination-buttons">
+                        <button>上一頁</button>
+                        <button class="active">1</button>
+                        <button>下一頁</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="settings" class="page-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <div>
+                        <h2>系統設定</h2>
+                        <p style="color: #666; font-size: 14px; margin-top: 5px;">管理您的個人檔案和系統配置</p>
+                    </div>
+                </div>
+
+                <div id="profileSettings" class="settings-content active">
+                    <div style="display: flex; align-items: center; gap: 20px; margin-bottom: 30px; padding: 20px; background: #f9fafb; border-radius: 15px;">
+                        <div class="user-avatar" id="settingUserAvatar" style="width: 80px; height: 80px; font-size: 32px;">張</div>
+                        <div style="flex: 1;">
+                            <h3 style="font-size: 20px; color: #333; margin-bottom: 5px;" id="settingUserNameDisplay">張護理師</h3>
+                            <p style="color: #666; margin-bottom: 10px;" id="settingUserDetailDisplay">資深護理師 · 內科</p>
+                            <button class="btn btn-secondary" style="padding: 8px 20px;">更換頭像</button>
+                        </div>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>姓名</label>
+                            <input type="text" id="settingNameInput" value="張護理師" placeholder="請輸入姓名" oninput="updateProfileDisplay()">
+                        </div>
+                        <div class="form-group">
+                            <label>員工編號</label>
+                            <input type="text" id="settingIdInput" value="N001" placeholder="員工編號" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label>電子郵件</label>
+                            <input type="email" id="settingEmailInput" value="nurse.chang@hospital.com" placeholder="email@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>聯絡電話</label>
+                            <input type="tel" id="settingPhoneInput" value="0912-345-678" placeholder="手機號碼">
+                        </div>
+                        <div class="form-group custom-select">
+                            <label>科別</label>
+                            <select id="settingDeptSelect" onchange="updateProfileDisplay()">
+                                <option value="內科">內科</option>
+                                <option value="外科">外科</option>
+                                <option value="骨科">骨科</option>
+                                <option value="泌尿科">泌尿科</option>
+                                <option value="婦產科">婦產科</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>職位</label>
+                            <input type="text" id="settingPositionInput" value="資深護理師" placeholder="職位" oninput="updateProfileDisplay()">
+                        </div>
+                    </div>
+<h3 style="color: #333; font-size: 18px; margin-bottom: 20px;">密碼設定</h3>
+                    
+                    <div class="form-group" style="max-width: 500px;">
+                        <label>目前密碼</label>
+                        <input type="password" id="currentPassword" placeholder="請輸入目前密碼">
+                    </div>
+                    <div class="form-group" style="max-width: 500px;">
+                        <label>新密碼</label>
+                        <input type="password" id="newPassword" placeholder="請輸入新密碼">
+                    </div>
+                    <div class="form-group" style="max-width: 500px; margin-bottom: 30px;">
+                        <label>確認新密碼</label>
+                        <input type="password" id="confirmNewPassword" placeholder="請再次輸入新密碼">
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button class="btn btn-secondary" type="button" onclick="switchPage('patients')">取消</button>
+                        <button class="btn btn-primary" type="button" onclick="saveSettings()">💾 儲存更新</button>
+                    </div>
+                    
+                    <div style="border-top: 2px solid #f0f0f0; padding-top: 20px; margin-top: 30px; text-align: right;">
+                        <button class="btn btn-danger" type="button" onclick="logout()">
+                            🚪 登出系統
+                        </button>
+                    </div>
+                    
+                </div>
+            </div>
+        </div>
+
+        <div id="addPatientForm" class="page-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <h2>新增病患</h2>
+                    <button class="btn btn-secondary" onclick="switchPage('patients')">← 返回列表</button>
+                </div>
+
+                <form id="newPatientForm" onsubmit="submitNewPatient(event)">
+                    <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 20px; font-size: 18px;">住院資訊</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>病患姓名 <span class="required">*</span></label>
+                            <input type="text" id="newPatientName" placeholder="請輸入姓名" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>病歷號 <span class="required">*</span></label>
+                            <input type="text" id="newPatientId" placeholder="例：P006" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>年齡 <span class="required">*</span></label>
+                            <input type="number" id="newPatientAge" placeholder="請輸入年齡" required="">
+                        </div>
+                        <div class="form-group custom-select">
+                            <label>性別 <span class="required">*</span></label>
+                            <select id="newPatientGender" required="">
+                                <option value="男">男</option>
+                                <option value="女">女</option>
+                                <option value="其他">其他</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <h3 style="color: #667eea; margin-top: 30px; margin-bottom: 20px; font-size: 18px;">住院資訊</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>病房床號 <span class="required">*</span></label>
+                            <input type="text" id="newPatientBed" placeholder="例：A101-2" required="">
+                        </div>
+                        <div class="form-group custom-select">
+                            <label>科別 <span class="required">*</span></label>
+                            <select id="newPatientDept" required="">
+                                <option value="內科">內科</option>
+                                <option value="外科">外科</option>
+                                <option value="骨科">骨科</option>
+                                <option value="泌尿科">泌尿科</option>
+                                <option value="婦產科">婦產科</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>診斷 <span class="required">*</span></label>
+                            <input type="text" id="newPatientDiagnosis" placeholder="請輸入主要診斷" required="">
+                        </div>
+                        <div class="form-group custom-select">
+                            <label>風險等級 <span class="required">*</span></label>
+                            <select id="newPatientRisk" required="">
+                                <option value="低風險">低風險</option>
+                                <option value="中風險">中風險</option>
+                                <option value="高風險">高風險</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>主治醫師 <span class="required">*</span></label>
+                            <input type="text" id="newPatientDoctor" placeholder="請輸入醫師姓名" required="">
+                        </div>
+                        <div class="form-group">
+                            <label>入院日期 <span class="required">*</span></label>
+                            <input type="date" id="newPatientAdmissionDate" required="">
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" onclick="switchPage('patients')">取消</button>
+                        <button type="button" class="btn btn-primary" onclick="submitNewPatient(event)">
+                            ✓ 儲存病患
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="patientRecordPreview" class="page-content">
+            <div class="form-container">
+                <div class="form-header">
+                    <div>
+                        <h2><span id="previewPatientName">病患</span> 的護理紀錄</h2>
+                        <p style="color: #666; font-size: 14px; margin-top: 5px;">預覽該病患先前儲存過的護理紀錄</p>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button class="btn btn-primary" id="addNewRecordBtn" onclick="openRecordFormForPreview()">
+                            + 新增護理紀錄
+                        </button>
+                        <button class="btn btn-secondary" onclick="switchPage('patients')">← 返回列表</button>
+                    </div>
+                </div>
+
+                <div id="recordPreviewList">
+                    </div>
+            </div>
+        </div>
+
+    </div>
+    <script>
+        
+        // =================================================================
+        // 🚨🚨 真實 API 呼叫設定 🚨🚨
+        // =================================================================
+        const REAL_API_SETTINGS = {
+             // 替換為您部署的後端服務 URL (與 api_server.py 的設定一致)
+             API_ENDPOINT: 'http://0.0.0.0:8000/api/predict', 
+             API_KEY: null, 
+             TIMEOUT_MS: 15000 
+        };
+
+        // =================================================================
+        // Copilot 核心狀態及功能
+        // =================================================================
+        
+        // 全局狀態：用於管理多個輸入框的 AI 建議狀態
+        // Key: input ID (e.g., 'recordInput-1'), Value: { suggestions: [], currentSuggestionIndex: 0 }
+        let inputStates = new Map(); 
+        let inputCounter = 0; // 用於生成唯一的 ID
+        let apiCallTimeouts = new Map(); // 用於管理每個輸入框的防抖計時器
+
+        const DEBOUNCE_DELAY = 500; 
+        const MIN_PROMPT_LENGTH = 3; 
+
+        // -----------------------------------------------------------------
+        // API 呼叫 (保持不變)
+        // -----------------------------------------------------------------
+        async function predictText(prompt) {
+             const { API_ENDPOINT, API_KEY, TIMEOUT_MS } = REAL_API_SETTINGS;
+             
+             const controller = new AbortController();
+             const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+             
+             try {
+                 const headers = { 
+                     'Content-Type': 'application/json',
+                 };
+                 if (API_KEY) {
+                     headers['Authorization'] = `Bearer ${API_KEY}`; 
+                 }
+                 
+                 const response = await fetch(API_ENDPOINT, {
+                     method: 'POST',
+                     headers: headers,
+                     body: JSON.stringify({ 
+                         prompt: prompt, 
+                         patient_id: currentEditingPatientId, 
+                         model: 'gpt2-nursing'
+                     }),
+                     signal: controller.signal 
+                 });
+                 
+                 clearTimeout(timeoutId); 
+                 
+                 if (!response.ok) {
+                     const errorBody = await response.text();
+                     // 僅在錯誤發生時彈出提示
+                     // alert(`後端 AI 服務錯誤：HTTP ${response.status} - 請檢查後端主控台。\n錯誤訊息: ${errorBody.substring(0, 100)}`);
+                     throw new Error(`後端 API 錯誤：${response.status}`);
+                 }
+
+                 const data = await response.json();
+                 
+                 return {
+                     alternatives: data.completions || [] 
+                 };
+                 
+             } catch (error) {
+                 clearTimeout(timeoutId);
+                 if (error.name === 'AbortError') {
+                     console.error("API 呼叫超時:", API_ENDPOINT);
+                     // alert('AI 服務請求超時。請檢查您的網路連線或後端服務是否正常運行。');
+                 } else {
+                     console.error("API 呼叫失敗:", error.message);
+                 }
+                 throw error; 
+             }
+        }
+
+
+        // -----------------------------------------------------------------
+        // 🔥 核心變動：動態創建輸入框 🔥
+        // -----------------------------------------------------------------
+        function addRecordInput(initialContent = '', focus = true) {
+            inputCounter++;
+            const inputId = `recordInput-${inputCounter}`;
+            const container = document.getElementById('recordInputsContainer');
+
+            const newBlock = document.createElement('div');
+            newBlock.className = 'record-input-block';
+            newBlock.id = `block-${inputCounter}`;
+
+            // 完整的 Copilot 結構 HTML
+            newBlock.innerHTML = `
+                <button type="button" class="btn-remove-block" title="移除此紀錄" onclick="removeRecordInput('${inputId}')">❌</button>
+                <div class="copilot-container form-group">
+                    <div id="overlay-${inputId}" class="suggestion-overlay"></div>
+                    <textarea 
+                        id="${inputId}"
+                        class="record-textarea"
+                        placeholder="請輸入護理紀錄內容 (例如：F) 傷口)" 
+                        rows="8" 
+                        required 
+                        oninput="handleInput(this)" 
+                        onkeydown="handleKeydown(event, this)"
+                        onfocus="setFocusState(this)"
+                    >${initialContent}</textarea>
+                </div>
+                <p style="margin-top: 10px; font-size: 14px; color: #666;">建議 ${inputCounter}：按 Tab 接受，↑/↓ 切換建議。</p>
+            `;
+
+            container.appendChild(newBlock);
+
+            // 初始化該輸入框的 AI 狀態
+            inputStates.set(inputId, { suggestions: [], currentSuggestionIndex: 0 });
+            
+            // 監聽滾動事件，確保 Overlay 與 Textarea 同步滾動
+            const inputEl = document.getElementById(inputId);
+            const overlayEl = document.getElementById(`overlay-${inputId}`);
+            inputEl.addEventListener('scroll', () => {
+                overlayEl.scrollTop = inputEl.scrollTop;
+                overlayEl.scrollLeft = inputEl.scrollLeft;
+            });
+
+            if (focus) {
+                inputEl.focus();
+            }
+        }
+        
+        // 移除輸入框
+        function removeRecordInput(inputId) {
+            if (document.querySelectorAll('.record-input-block').length <= 1) {
+                alert('必須保留至少一個護理紀錄區塊。');
+                return;
+            }
+            
+            if (confirm('確定要移除此護理紀錄區塊嗎？')) {
+                const blockId = inputId.split('-')[1];
+                const block = document.getElementById(`block-${blockId}`);
+                if (block) {
+                    block.remove();
+                    inputStates.delete(inputId);
+                    
+                    // 重新設置焦點到列表的第一個元素
+                    const remainingInputs = document.querySelectorAll('.record-textarea');
+                    if (remainingInputs.length > 0) {
+                         remainingInputs[0].focus();
+                    }
+                }
+            }
+        }
+        
+        // 記錄焦點狀態，雖然不是必需，但有助於除錯
+        function setFocusState(inputEl) {
+             // 確保在有焦點時清除其他輸入框的建議提示，避免干擾
+             inputStates.forEach((state, key) => {
+                 if (key !== inputEl.id && state.suggestions.length > 0) {
+                     state.suggestions = [];
+                     document.getElementById(`overlay-${key}`).innerHTML = '';
+                 }
+             });
+        }
+
+
+        // -----------------------------------------------------------------
+        // 處理輸入事件：觸發防抖 API 呼叫 (更新為多輸入框模式)
+        // -----------------------------------------------------------------
+        async function handleInput(inputEl) {
+            const fullText = inputEl.value;
+            const inputId = inputEl.id;
+            const overlayEl = document.getElementById(`overlay-${inputId}`);
+            let state = inputStates.get(inputId);
+            
+            if (!state) return; 
+
+            state.suggestions = [];
+            state.currentSuggestionIndex = 0;
+            overlayEl.innerHTML = '';
+            
+            if (apiCallTimeouts.has(inputId)) {
+                clearTimeout(apiCallTimeouts.get(inputId));
+            }
+            
+            if (fullText.length < MIN_PROMPT_LENGTH) {
+                 return;
+            }
+            
+            apiCallTimeouts.set(inputId, setTimeout(async () => {
+                showLoading('正在呼叫 AI 模型...'); 
+                try {
+                    const result = await predictText(fullText); 
+                    
+                    if (result && result.alternatives && result.alternatives.length > 0) {
+                        const filteredSuggestions = result.alternatives.filter(s => s.startsWith(fullText)); 
+
+                        if (filteredSuggestions.length > 0) {
+                            state.suggestions = filteredSuggestions;
+                            state.currentSuggestionIndex = 0;
+                            displayCurrentSuggestion(inputEl); 
+                        }
+                    } 
+                } catch (error) {
+                    // API 錯誤時不顯示任何建議
+                    overlayEl.innerHTML = '';
+                } finally {
+                    hideLoading(); 
+                }
+            }, DEBOUNCE_DELAY));
+        }
+
+        // -----------------------------------------------------------------
+        // 處理按鍵事件：Tab (接受), Up/Down (切換) (更新為多輸入框模式)
+        // -----------------------------------------------------------------
+        function handleKeydown(event, inputEl) {
+            const inputId = inputEl.id;
+            let state = inputStates.get(inputId);
+            
+            if (!state || state.suggestions.length === 0) {
+                 return; 
+            }
+            
+            // 只有在有建議時才攔截按鍵事件
+            if (event.key === 'Tab' || event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.preventDefault();
+
+                if (event.key === 'Tab') {
+                    // 接受建議
+                    const suggestion = state.suggestions[state.currentSuggestionIndex];
+                    
+                    inputEl.value = suggestion; 
+                    
+                    // 清空建議狀態
+                    state.suggestions = [];
+                    state.currentSuggestionIndex = 0;
+                    document.getElementById(`overlay-${inputId}`).innerHTML = '';
+                    
+                    inputEl.focus();
+                    inputEl.setSelectionRange(inputEl.value.length, inputEl.value.length);
+                } 
+                else {
+                    // 切換建議
+                    if (event.key === 'ArrowUp') {
+                        // 向上切換：索引減一，如果到頭則跳到末尾
+                        state.currentSuggestionIndex = (state.currentSuggestionIndex - 1 + state.suggestions.length) % state.suggestions.length;
+                    } else {
+                        // 向下切換：索引加一，如果到末尾則跳到開頭
+                        state.currentSuggestionIndex = (state.currentSuggestionIndex + 1) % state.suggestions.length;
+                    }
+                    
+                    displayCurrentSuggestion(inputEl);
+                }
+            } 
+        }
+
+        // 顯示當前的建議 (更新為多輸入框模式)
+        function displayCurrentSuggestion(inputEl) {
+            const inputId = inputEl.id;
+            const overlayEl = document.getElementById(`overlay-${inputId}`);
+            let state = inputStates.get(inputId);
+
+            if (!state || state.suggestions.length === 0) {
+                overlayEl.innerHTML = '';
+                return;
+            }
+            
+            const userText = inputEl.value;
+            const currentSuggestion = state.suggestions[state.currentSuggestionIndex];
+            
+            if (currentSuggestion.startsWith(userText)) {
+                
+                const escapeHtml = (unsafe) => {
+                    return unsafe
+                         .replace(/&/g, "&amp;")
+                         .replace(/</g, "&lt;")
+                         .replace(/>/g, "&gt;")
+                         .replace(/"/g, "&quot;")
+                         .replace(/'/g, "&#039;");
+                };
+                
+                const userTextEscaped = escapeHtml(userText);
+                const currentSuggestionEscaped = escapeHtml(currentSuggestion);
+                
+                // 找到補全的灰色文字部分
+                const ghostTextEscaped = currentSuggestionEscaped.substring(userTextEscaped.length);
+
+
+                // 使用透明文字佔位，確保輸入和補全的對齊
+                const invisibleUserTextHtml = userTextEscaped.replace(/\n/g, '<br>');
+                const userPrefix = `<span style="color: transparent;">${invisibleUserTextHtml}</span>`;
+                
+                const ghostSuffixHtml = ghostTextEscaped.replace(/\n/g, '<br>');
+                
+                // 💡 提示使用者當前建議的序號
+                const hint = ` [${state.currentSuggestionIndex + 1}/${state.suggestions.length} ↑↓切換]`;
+                const ghostSuffix = `<span style="color: #ccc;">${ghostSuffixHtml}${hint}</span>`;
+                
+                overlayEl.style.whiteSpace = 'pre-wrap'; 
+                overlayEl.innerHTML = userPrefix + ghostSuffix;
+
+                // 確保 overlay 滾動與 input 同步
+                overlayEl.scrollTop = inputEl.scrollTop;
+                overlayEl.scrollLeft = inputEl.scrollLeft;
+
+            } else {
+                overlayEl.innerHTML = '';
+            }
+        }
+        
+        // =================================================================
+        // 模擬資料庫及其他功能 (已更新為多輸入框模式)
+        // =================================================================
+        let currentEditingPatientId = null;
+        
+        let patientRecords = {}; 
+        
+        let currentUser = {
+            id: 'N001',
+            name: '張護理師',
+            position: '資深護理師',
+            department: '內科',
+            email: 'nurse.chang@hospital.com',
+            phone: '0912-345-678'
+        };
+        
+        let patientList = [];
+
+        
+        function login(event) {
+            event.preventDefault();
+            const id = document.getElementById('loginId').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (id && password) {
+                showLoading();
+                setTimeout(() => {
+                    hideLoading();
+                    
+                    currentUser.id = id;
+                    
+                    document.getElementById('mainApp').style.display = 'block';
+                    document.getElementById('login').classList.remove('active');
+                    
+                    initializeUserProfile();
+                    updatePaginationInfo(); 
+                    switchPage('patients'); 
+                    showSuccessMessage('登入成功！歡迎回來。');
+                }, 1000);
+            } else {
+                alert('請輸入員工編號和密碼！');
+            }
+        }
+        
+        function logout() {
+            if (confirm('確定要登出系統嗎？')) {
+                showLoading();
+                setTimeout(() => {
+                    hideLoading();
+                    document.getElementById('mainApp').style.display = 'none';
+                    document.getElementById('login').classList.add('active');
+                    document.getElementById('loginPassword').value = ''; 
+                    showSuccessMessage('您已成功登出。');
+                }, 1000);
+            }
+        }
+        
+        function initializeUserProfile() {
+            const name = currentUser.name;
+            const avatarLetter = name.charAt(0) || '？';
+            
+            document.getElementById('navUserName').textContent = name + '護理師';
+            document.getElementById('navUserDetail').textContent = `${currentUser.position} · ${currentUser.department}`;
+            document.getElementById('navUserAvatar').textContent = avatarLetter;
+            
+            document.getElementById('settingUserAvatar').textContent = avatarLetter;
+            document.getElementById('settingUserNameDisplay').textContent = name + '護理師';
+            document.getElementById('settingUserDetailDisplay').textContent = `${currentUser.position} · ${currentUser.department}`;
+            
+            document.getElementById('settingNameInput').value = currentUser.name;
+            document.getElementById('settingIdInput').value = currentUser.id;
+            document.getElementById('settingEmailInput').value = currentUser.email;
+            document.getElementById('settingPhoneInput').value = currentUser.phone;
+            document.getElementById('settingPositionInput').value = currentUser.position;
+            document.getElementById('settingDeptSelect').value = currentUser.department;
+        }
+
+        function updateProfileDisplay() {
+            const nameInput = document.getElementById('settingNameInput').value;
+            const positionInput = document.getElementById('settingPositionInput').value;
+            const deptSelect = document.getElementById('settingDeptSelect').value;
+            
+            const avatarLetter = nameInput.charAt(0) || '？';
+            
+            currentUser.name = nameInput;
+            currentUser.position = positionInput;
+            currentUser.department = deptSelect;
+
+            document.getElementById('navUserName').textContent = nameInput + '護理師';
+            document.getElementById('navUserDetail').textContent = `${positionInput} · ${deptSelect}`;
+            document.getElementById('navUserAvatar').textContent = avatarLetter;
+            
+            document.getElementById('settingUserAvatar').textContent = avatarLetter;
+            document.getElementById('settingUserNameDisplay').textContent = nameInput + '護理師';
+            document.getElementById('settingUserDetailDisplay').textContent = `${positionInput} · ${deptSelect}`;
+        }
+        
+        function saveSettings() {
+             currentUser.email = document.getElementById('settingEmailInput').value;
+             currentUser.phone = document.getElementById('settingPhoneInput').value;
+             
+             updateProfileDisplay(); 
+             showSuccessMessage('個人設定已儲存更新！');
+        }
+
+
+        function switchPage(pageName) {
+            const pages = document.querySelectorAll('.page-content');
+            pages.forEach(page => page.classList.remove('active'));
+            
+            const targetPage = document.getElementById(pageName);
+            if (targetPage) {
+                targetPage.classList.add('active');
+            } else {
+                console.error('Page not found:', pageName);
+                document.getElementById('patients').classList.add('active'); 
+            }
+
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        }
+        
+        let currentPreviewingPatient = { name: null, id: null }; 
+        function showPatientPreview(name, id) {
+            currentPreviewingPatient = { name, id };
+            document.getElementById('previewPatientName').textContent = name;
+            
+            renderPatientRecords(id);
+            
+            switchPage('patientRecordPreview');
+        }
+        
+        function openRecordFormForPreview() {
+            if (currentPreviewingPatient.id) {
+                 openRecordForm(currentPreviewingPatient.name, currentPreviewingPatient.id);
+            } else {
+                 alert('錯誤：無法識別病患。');
+                 switchPage('patients');
+            }
+        }
+
+        
+        function renderPatientRecords(patientId) {
+            const listContainer = document.getElementById('recordPreviewList');
+            const records = (patientRecords[patientId] || []).sort((a, b) => new Date(b.date) - new Date(a.date));
+            listContainer.innerHTML = ''; 
+
+            if (records.length === 0) {
+                listContainer.innerHTML = '<p style="color: #666; text-align: center;">此病患尚無護理紀錄。</p>';
+                return;
+            } 
+            
+            records.forEach((record, index) => {
+                const recordHtml = `
+                    <div class="record-preview-item" data-record-index="${index}">
+                        <div class="record-item-header">
+                            <strong>${record.date}</strong>
+                            <div class="record-actions">
+                                <span>紀錄人：${record.author}</span>
+                                <button class="action-btn edit" title="編輯" onclick="toggleEditRecord('${patientId}', ${index})">✏️</button>
+                                <button class="action-btn delete" title="刪除" onclick="deleteRecord('${patientId}', ${index})">🗑️</button>
+                            </div>
+                        </div>
+                        <p id="record-content-${patientId}-${index}">${record.full}</p>
+                        
+                        <div class="record-edit-area" id="edit-area-${patientId}-${index}">
+                            <textarea class="record-edit-textarea" id="edit-textarea-${patientId}-${index}">${record.full}</textarea>
+                            <div class="record-edit-buttons">
+                                <button class="btn btn-secondary" onclick="toggleEditRecord('${patientId}', ${index})">取消</button>
+                                <button class="btn btn-primary" onclick="saveEditRecord('${patientId}', ${index})">儲存</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listContainer.innerHTML += recordHtml;
+            });
+        }
+        
+        function toggleEditRecord(patientId, index) {
+            const editArea = document.getElementById(`edit-area-${patientId}-${index}`);
+            const contentP = document.getElementById(`record-content-${patientId}-${index}`);
+            const textarea = document.getElementById(`edit-textarea-${patientId}-${index}`);
+            
+            editArea.classList.toggle('active');
+            contentP.style.display = editArea.classList.contains('active') ? 'none' : 'block';
+            
+            if (editArea.classList.contains('active')) {
+                 textarea.value = patientRecords[patientId][index].full;
+                 textarea.focus();
+            }
+        }
+        
+        function saveEditRecord(patientId, index) {
+            const textarea = document.getElementById(`edit-textarea-${patientId}-${index}`);
+            const newContent = textarea.value;
+            
+            if (!newContent.trim()) {
+                 alert('紀錄內容不能為空！');
+                 return;
+            }
+            
+            if (confirm('確定要儲存編輯後的紀錄嗎？')) {
+                showLoading();
+                setTimeout(() => {
+                     patientRecords[patientId][index].full = newContent;
+                     
+                     const now = new Date();
+                     patientRecords[patientId][index].date = now.toLocaleString('zh-TW', { 
+                         year: 'numeric', month: '2-digit', day: '2-digit', 
+                         hour: '2-digit', minute: '2-digit', hour12: false
+                     }).replace(/\//g, '-');
+                     patientRecords[patientId][index].author = currentUser.name + '護理師' + ' (已編輯)';
+                     
+                     renderPatientRecords(patientId);
+                     hideLoading();
+                     showSuccessMessage('護理紀錄已成功編輯並儲存！');
+                }, 1000);
+            }
+        }
+        
+        function deleteRecord(patientId, index) {
+            if (confirm('確定要刪除這筆護理紀錄嗎？此操作無法復原！')) {
+                showLoading();
+                setTimeout(() => {
+                    patientRecords[patientId].splice(index, 1);
+                    
+                    renderPatientRecords(patientId);
+                    hideLoading();
+                    showSuccessMessage('護理紀錄已成功刪除！');
+                }, 1000);
+            }
+        }
+
+
+        function openRecordForm(name, id) {
+            currentEditingPatientId = id; 
+            document.getElementById('formPatientName').textContent = name; 
+            
+            // 確保每次開啟表單時都重置並初始化輸入框
+            resetForm(false); 
+            
+            document.getElementById('recordTime').value = new Date(new Date().getTime() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            // 焦點已在 resetForm -> addRecordInput 中設置
+
+            switchPage('form');
+        }
+
+        function cancelRecordForm() {
+            currentEditingPatientId = null; 
+            switchPage('patients'); 
+        }
+
+        // 🔥 核心變動：遍歷所有輸入框並合併內容
+        function submitForm(event) {
+            event.preventDefault();
+            
+            const recordInputs = document.querySelectorAll('#recordInputsContainer .record-textarea');
+            let finalRecordContent = '';
+            let hasContent = false;
+            
+            // 遍歷所有輸入框，用兩個換行符號合併內容
+            recordInputs.forEach(input => {
+                const content = input.value.trim();
+                if (content) {
+                    if (finalRecordContent) {
+                        finalRecordContent += '\n\n'; 
+                    }
+                    finalRecordContent += content;
+                    hasContent = true;
+                }
+            });
+
+            if (!hasContent) {
+                alert('請輸入至少一格護理紀錄內容！');
+                return;
+            }
+
+            const recordTimeInput = document.getElementById('recordTime').value;
+
+            if (!recordTimeInput) {
+                alert('請輸入紀錄時間！');
+                return;
+            }
+            
+            if (!currentEditingPatientId) {
+                alert('錯誤：未指定病患。請返回列表並重新點選按鈕。');
+                return;
+            }
+            
+            const formattedDate = new Date(recordTimeInput).toLocaleString('zh-TW', { 
+                    year: 'numeric', month: '2-digit', day: '2-digit', 
+                    hour: '2-digit', minute: '2-digit', hour12: false
+                }).replace(/\//g, '-');
+
+            const newRecord = {
+                date: formattedDate,
+                author: currentUser.name + '護理師', 
+                full: finalRecordContent // 使用合併後的內容
+            };
+            
+            if (!patientRecords[currentEditingPatientId]) {
+                patientRecords[currentEditingPatientId] = [];
+            }
+            patientRecords[currentEditingPatientId].unshift(newRecord); 
+            
+            showLoading();
+            setTimeout(() => {
+                hideLoading();
+                showSuccessMessage('護理紀錄已成功儲存！');
+                
+                resetForm(false);
+                currentEditingPatientId = null;
+                
+                setTimeout(() => {
+                    switchPage('patients'); 
+                }, 1000);
+            }, 1500);
+        }
+
+        // 🔥 核心變動：重置時清空所有動態創建的輸入框
+        function resetForm(showConfirm = true) {
+            let confirmed = true;
+            if (showConfirm) {
+                confirmed = confirm('確定要清除所有表單內容嗎？此操作會移除所有新增的紀錄區塊！');
+            }
+            
+            if (confirmed) {
+                document.getElementById('recordForm').reset(); 
+                
+                // 1. 清空所有動態輸入和狀態
+                const container = document.getElementById('recordInputsContainer');
+                container.innerHTML = '';
+                inputStates.clear();
+                apiCallTimeouts.clear();
+                inputCounter = 0; // 重置計數器
+                
+                // 2. 重新建立初始的第一個輸入框
+                addRecordInput(); 
+            }
+        }
+
+
+        
+        function submitNewPatient(event) {
+            event.preventDefault();
+            showLoading();
+
+            const name = document.getElementById('newPatientName').value;
+            const id = document.getElementById('newPatientId').value;
+            
+            if (patientRecords.hasOwnProperty(id)) {
+                 hideLoading();
+                 alert('錯誤：病歷號 ' + id + ' 已存在！');
+                 return;
+            }
+
+            const age = document.getElementById('newPatientAge').value;
+            const gender = document.getElementById('newPatientGender').value;
+            const bed = document.getElementById('newPatientBed').value;
+            const dept = document.getElementById('newPatientDept').value;
+            const diagnosis = document.getElementById('newPatientDiagnosis').value;
+            const risk = document.getElementById('newPatientRisk').value;
+            const doctor = document.getElementById('newPatientDoctor').value;
+            let admissionDate = document.getElementById('newPatientAdmissionDate').value;
+            
+            if (!admissionDate) {
+                admissionDate = new Date().toISOString().split('T')[0]; 
+            }
+            
+            const newPatient = {
+                id, name, age, gender, bed, dept, diagnosis, risk, doctor, admissionDate
+            };
+            
+            patientRecords[id] = []; 
+            patientList.unshift(newPatient); 
+            
+            renderPatientTable(patientList); 
+
+            setTimeout(() => {
+                hideLoading();
+                showSuccessMessage('病患已成功新增！');
+                document.getElementById('newPatientForm').reset();
+                updatePaginationInfo(); 
+                switchPage('patients');
+            }, 1000);
+        }
+        
+        function renderPatientTable(listToRender) {
+            const tableBody = document.getElementById('patientTableBody');
+            tableBody.innerHTML = ''; 
+            
+            listToRender.forEach(p => {
+                 const newRow = tableBody.insertRow(); 
+                 const avatarLetter = p.name.charAt(0) || '？';
+                 const riskBadgeClass = getRiskBadgeClass(p.risk);
+                 const doctorEmoji = '👨‍⚕️'; 
+                 const patientDetails = `${p.id} · ${p.age}歲 · ${p.gender}`;
+
+                 newRow.innerHTML = `
+                     <td>
+                         <div class="patient-info">
+                             <div class="patient-avatar">${avatarLetter}</div>
+                             <div class="patient-details">
+                                 <div class="name">${p.name}</div>
+                                 <div class="id">${patientDetails}</div>
+                             </div>
+                         </div>
+                     </td>
+                     <td>📍 ${p.bed}</td>
+                     <td>${p.dept}</td>
+                     <td>${p.diagnosis}</td>
+                     <td><span class${riskBadgeClass}>${p.risk}</span></td>
+                     <td>${doctorEmoji} ${p.doctor}</td>
+                     <td>📅 ${p.admissionDate}</td>
+                     <td>
+                         <div class="action-buttons">
+                             <button class="action-btn view" title="檢視紀錄" onclick="showPatientPreview('${p.name}', '${p.id}')">👁️</button>
+                             <button class="action-btn edit" title="新增紀錄" onclick="openRecordForm('${p.name}', '${p.id}')">✏️</button>
+                         </div>
+                     </td>
+                 `;
+            });
+            updatePaginationInfo();
+            
+            if (listToRender.length === 0) {
+                 const noResultRow = tableBody.insertRow();
+                 noResultRow.innerHTML = `<td colspan="8" style="text-align: center; color: #999; padding: 30px;">查無相符的病患資料。</td>`;
+            }
+        }
+        
+        function searchPatients() {
+            const searchTerm = document.getElementById('patientSearchInput').value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                 renderPatientTable(patientList);
+                 return;
+            }
+
+            const searchResult = patientList.filter(p => 
+                 p.name.toLowerCase().includes(searchTerm) || 
+                 p.id.toLowerCase().includes(searchTerm)
+            );
+            
+            renderPatientTable(searchResult);
+            
+            if (searchResult.length === 0) {
+                 alert('查無此人：沒有找到符合 ' + searchTerm + ' 的病患。');
+            }
+        }
+        
+
+        function getRiskBadgeClass(riskLevel) {
+            switch(riskLevel) {
+                case '高風險':
+                    return '="status-badge" style="background: #fee2e2; color: #991b1b;"';
+                case '中風險':
+                    return '="status-badge status-pending"';
+                case '低風險':
+                    return '="status-badge status-completed"';
+                default:
+                    return '="status-badge"';
+            }
+        }
+
+
+        
+        function updatePaginationInfo() {
+            const rowCount = patientList.length; 
+            const infoEl = document.querySelector('.pagination-info');
+            
+            if (rowCount === 0) {
+                infoEl.textContent = '目前無病患資料';
+            } else {
+                infoEl.textContent = `顯示 1 到 ${rowCount} 筆，共 ${rowCount} 筆病患資料`;
+            }
+        }
+        
+        function showLoading(text = '處理中...') {
+            const loadingEl = document.getElementById('loading');
+            let textEl = loadingEl.querySelector('.loading-text');
+            if (!textEl) {
+                 textEl = document.createElement('div');
+                 textEl.className = 'loading-text';
+                 textEl.style.marginTop = '20px';
+                 textEl.style.fontSize = '16px';
+                 textEl.style.color = '#667eea';
+                 loadingEl.appendChild(textEl);
+            }
+            textEl.textContent = text;
+            loadingEl.classList.add('show');
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').classList.remove('show');
+        }
+
+        function showSuccessMessage(messageText) {
+            const successMsg = document.getElementById('successMessage');
+            
+            const p = successMsg.querySelector('p');
+            if (p) {
+                p.textContent = messageText || '操作已完成';
+            }
+
+            successMsg.classList.remove('hide');
+            successMsg.classList.add('show');
+            
+            setTimeout(() => {
+                successMsg.classList.remove('show');
+                successMsg.classList.add('hide');
+                setTimeout(() => {
+                    successMsg.classList.remove('hide');
+                }, 500);
+            }, 3000);
+        }
+
+        // 初始載入時
+        document.addEventListener('DOMContentLoaded', (event) => {
+            patientList.push({
+                 id: 'P001', name: '王小明', age: 65, gender: '男', bed: 'A101-2', dept: '內科', 
+                 diagnosis: '肺炎併發敗血症', risk: '高風險', doctor: '陳大醫', admissionDate: '2025-11-01'
+            });
+            // 由於紀錄內容現在會被合併，這裡的內容也稍微修改一下
+            patientRecords['P001'] = [
+                 { date: '2025-11-05 10:30', author: '張護理師', full: 'F) 呼吸急促與低血氧。D) Spo2 90%，呼吸淺快，雙側肺部聽診有囉音。\n\n[DART 紀錄 2]\nA) 呼吸型態改變。\nR) 給予氧氣鼻導管 2L/min，協助採半坐臥。\nT) 立即通知醫師，監測 Spo2 變化。' },
+                 { date: '2025-11-04 18:00', author: '李護理師', full: 'F) 飲食與營養。\n\nD) 病患主訴「肚子有點餓」，進食清粥半碗，生命徵象穩定。\nA) 狀況穩定，恢復期。' }
+            ];
+            
+            renderPatientTable(patientList);
+        });
+    </script>
+
+
+</body></html>
