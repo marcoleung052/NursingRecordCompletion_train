@@ -70,7 +70,7 @@ async function predictText(inputText) {
  * Copilot 模式的觸發器函式 (在主 HTML 腳本中呼叫)
  * -----------------------------------------------------------
  */
-function debounceAPICall(inputElement, callback, delay = 5000) {
+function debounceAPICall(inputElement, callback, delay = 10000) {
     if (apiCallTimeout) {
         clearTimeout(apiCallTimeout);
     }
