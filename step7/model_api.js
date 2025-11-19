@@ -4,7 +4,8 @@
  */
 
 /*const BACKEND_API_URL = "http://127.0.0.1:5000/predict";*/
-const BACKEND_API_URL = "http://120.126.24.45:8001/api/predict";
+const BACKEND_API_URL = "https://MarcoLeung052-nursing-copilot-api.hf.space/api/predict";
+//const BACKEND_API_URL = "http://120.126.24.45:8001/api/predict";
 let apiCallTimeout = null;
 let isAPICallInProgress = false;
 
